@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: html(content=~{::main}, title='Comparison Results', scripts=~{::script})}">
+<body>
+    <main>
+        <div class="banner text-center">
+            <div class="banner-content">
+                <h1 class="display-4">Comparison Results</h1>
+                <p class="lead">Analysis of differences between your Excel files</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <h5 class="card-title">Matches</h5>
+                            <h3 class="mb-0" th:text="${#lists.size(results.?[status.name() == 'MATCH'])}">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-times-circle fa-2x mb-2"></i>
+                            <h5 class="card-title">Mismatches</h5>
+                            <h3 class="mb-0" th:text="${#lists.size(results.?[status.name() == 'MISMATCH'])}">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body text-center">
+                            <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                            <h5 class="card-title">Missing</h5>
+                            <h3 class="mb-0" 
+                                th:text="${#lists.size(results.?[status.name() == 'MISSING_IN_BASE']) + 
+                                         #lists.size(results.?[status.name() == 'MISSING_IN_TARGET'])}">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                            <h5 class="card-title">Validation Errors</h5>
+                            <h3 class="mb-0" th:text="${#lists.size(results.?[status.name() == 'VALIDATION_ERROR'])}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Report Button -->
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <a th:if="${reportPath}" th:href="@{'/excel/download/' + ${#strings.substringAfterLast(reportPath, '/')}}"
+                       class="btn btn-primary btn-lg">
+                        <i class="fas fa-download me-2"></i>Download Detailed Report
+                    </a>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">
+                        <i class="fas fa-list me-2"></i>Detailed Results
+                    </h3>
+
+                    <!-- Filter Controls -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="searchInput" 
+                                       placeholder="Search results...">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Statuses</option>
+                                <option value="MATCH">Matches</option>
+                                <option value="MISMATCH">Mismatches</option>
+                                <option value="MISSING_IN_BASE">Missing in Base</option>
+                                <option value="MISSING_IN_TARGET">Missing in Target</option>
+                                <option value="VALIDATION_ERROR">Validation Errors</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="resultsTable">
+                            <thead>
+                                <tr>
+                                    <th>Field Name</th>
+                                    <th>Base Value</th>
+                                    <th>Target Value</th>
+                                    <th>Status</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="result : ${results}" th:class="${result.status.name() == 'MATCH' ? 'table-success' : 
+                                    (result.status.name() == 'MISMATCH' ? 'table-danger' : 
+                                    (result.status.name() == 'VALIDATION_ERROR' ? 'table-danger' : 'table-warning'))}">
+                                    <td th:text="${result.fieldName}">Field</td>
+                                    <td th:text="${result.baseValue}">Base</td>
+                                    <td th:text="${result.targetValue}">Target</td>
+                                    <td>
+                                        <span th:class="${'badge ' + 
+                                            (result.status.name() == 'MATCH' ? 'bg-success' : 
+                                            (result.status.name() == 'MISMATCH' ? 'bg-danger' : 
+                                            (result.status.name() == 'VALIDATION_ERROR' ? 'bg-danger' : 'bg-warning')))}"
+                                              th:text="${result.status}">Status</span>
+                                    </td>
+                                    <td th:text="${result.message}">Message</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- No Results Message -->
+                    <div th:if="${#lists.isEmpty(results)}" class="text-center py-5">
+                        <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No comparison results available</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/excel" class="btn btn-secondary me-2">
+                        <i class="fas fa-upload me-2"></i>Compare More Files
+                    </a>
+                    <a href="/config" class="btn btn-info">
+                        <i class="fas fa-cog me-2"></i>Configure Comparison
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', filterResults);
+        document.getElementById('statusFilter').addEventListener('change', filterResults);
+
+        function filterResults() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#resultsTable tbody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const status = row.querySelector('td:nth-child(4)').textContent;
+                const matchesSearch = text.includes(searchText);
+                const matchesStatus = !statusFilter || status.includes(statusFilter);
+                row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+            });
+        }
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    </script>
+</body>
+</html>
