@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: html(content=~{::main}, title='Error', scripts=~{::script})}">
+<body>
+    <main>
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8 text-center">
+                    <div class="error-container">
+                        <!-- Error Icon -->
+                        <div class="mb-4">
+                            <i class="fas fa-exclamation-circle text-danger" style="font-size: 5rem;"></i>
+                        </div>
+
+                        <!-- Error Message -->
+                        <h1 class="display-4 mb-4">Oops! Something went wrong</h1>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <p class="lead text-danger mb-0" th:text="${error ?: 'An unexpected error occurred'}">
+                                    Error Message
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <a href="javascript:history.back()" class="btn btn-secondary me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Go Back
+                            </a>
+                            <a href="/" class="btn btn-primary">
+                                <i class="fas fa-home me-2"></i>Return Home
+                            </a>
+                        </div>
+
+                        <!-- Help Section -->
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-question-circle me-2"></i>Need Help?
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="help-item">
+                                            <h6><i class="fas fa-check-circle me-2"></i>Common Solutions</h6>
+                                            <ul class="list-unstyled">
+                                                <li>Refresh the page</li>
+                                                <li>Clear browser cache</li>
+                                                <li>Check file formats</li>
+                                                <li>Verify input data</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="help-item">
+                                            <h6><i class="fas fa-info-circle me-2"></i>Additional Resources</h6>
+                                            <ul class="list-unstyled">
+                                                <li><a href="/config">Check Configuration</a></li>
+                                                <li><a href="/excel">Try New Comparison</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Optional: Add any error-specific JavaScript here
+        console.error('Page Error:', document.querySelector('.lead.text-danger').textContent);
+    </script>
+
+    <style>
+        .error-container {
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .help-item {
+            padding: 1rem;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+
+        .help-item h6 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .help-item ul li {
+            margin-bottom: 0.5rem;
+            color: #6c757d;
+        }
+
+        .action-buttons {
+            margin: 2rem 0;
+        }
+
+        .action-buttons .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+        }
+    </style>
+</body>
+</html>
