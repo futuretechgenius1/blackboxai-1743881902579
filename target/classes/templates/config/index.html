@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: html(content=~{::main}, title='Configuration', scripts=~{::script})}">
+<body>
+    <main>
+        <div class="banner text-center">
+            <div class="banner-content">
+                <h1 class="display-4">Configuration Management</h1>
+                <p class="lead">Manage comparison fields and validation rules</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12 text-end">
+                    <a th:href="@{/config/fields/new}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add New Field
+                    </a>
+                </div>
+            </div>
+
+            <!-- Fields Table -->
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">
+                        <i class="fas fa-list me-2"></i>Comparison Fields
+                    </h3>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="fieldsTable">
+                            <thead>
+                                <tr>
+                                    <th>Field Name</th>
+                                    <th>Display Label</th>
+                                    <th>Column Index</th>
+                                    <th>Key Field</th>
+                                    <th>Status</th>
+                                    <th>Rules</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="field : ${fields}">
+                                    <td th:text="${field.fieldName}">Field Name</td>
+                                    <td th:text="${field.displayLabel}">Display Label</td>
+                                    <td th:text="${field.columnIndex}">0</td>
+                                    <td>
+                                        <span th:if="${field.key}" class="badge bg-primary">
+                                            <i class="fas fa-key me-1"></i>Key
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span th:class="${'badge ' + (field.active ? 'bg-success' : 'bg-danger')}"
+                                              th:text="${field.active ? 'Active' : 'Inactive'}">
+                                            Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/config/fields/{id}/rules(id=${field.id})}" 
+                                           class="btn btn-sm btn-info">
+                                            <i class="fas fa-shield-alt me-1"></i>
+                                            <span th:text="${#sets.size(field.validationRules)}">0</span> Rules
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a th:href="@{/config/fields/{id}/edit(id=${field.id})}" 
+                                               class="btn btn-sm btn-primary"
+                                               data-bs-toggle="tooltip" 
+                                               title="Edit Field">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-danger"
+                                                    th:data-field-id="${field.id}"
+                                                    th:data-field-name="${field.fieldName}"
+                                                    onclick="confirmDelete(this)"
+                                                    data-bs-toggle="tooltip" 
+                                                    title="Delete Field">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- No Fields Message -->
+                    <div th:if="${#lists.isEmpty(fields)}" class="text-center py-5">
+                        <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No comparison fields configured</h4>
+                        <p class="text-muted">Start by adding a new comparison field</p>
+                        <a th:href="@{/config/fields/new}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Add New Field
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions Card -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle me-2"></i>Configuration Guide
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Comparison Fields</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Define fields to compare between Excel files
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Set key fields for row matching
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Specify column indices (0-based)
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Validation Rules</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Add validation rules for each field
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Support for regex, range, and null checks
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Enable/disable rules as needed
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete the field "<span id="fieldNameToDelete"></span>"?</p>
+                        <p class="text-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            This action cannot be undone.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form id="deleteForm" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Delete confirmation
+        function confirmDelete(button) {
+            const fieldId = button.getAttribute('data-field-id');
+            const fieldName = button.getAttribute('data-field-name');
+            
+            document.getElementById('fieldNameToDelete').textContent = fieldName;
+            document.getElementById('deleteForm').action = `/config/fields/${fieldId}/delete`;
+            
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+</body>
+</html>
