@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: html(content=~{::main}, title=${field.id} ? 'Edit Field' : 'New Field', scripts=~{::script})}">
+<body>
+    <main>
+        <div class="banner text-center">
+            <div class="banner-content">
+                <h1 class="display-4" th:text="${field.id ? 'Edit Field' : 'New Field'}">Field Form</h1>
+                <p class="lead">Configure comparison field details</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <form th:object="${field}" 
+                                  th:action="${field.id ? '/config/fields/' + field.id : '/config/fields'}"
+                                  method="post" 
+                                  class="needs-validation" 
+                                  novalidate>
+
+                                <!-- Field Name -->
+                                <div class="mb-4">
+                                    <label for="fieldName" class="form-label">
+                                        <i class="fas fa-tag me-2"></i>Field Name
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="fieldName" 
+                                           th:field="*{fieldName}"
+                                           required>
+                                    <div class="invalid-feedback">
+                                        Please provide a field name
+                                    </div>
+                                    <div class="form-text">
+                                        A unique identifier for this field
+                                    </div>
+                                </div>
+
+                                <!-- Display Label -->
+                                <div class="mb-4">
+                                    <label for="displayLabel" class="form-label">
+                                        <i class="fas fa-font me-2"></i>Display Label
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="displayLabel" 
+                                           th:field="*{displayLabel}"
+                                           required>
+                                    <div class="invalid-feedback">
+                                        Please provide a display label
+                                    </div>
+                                    <div class="form-text">
+                                        How this field will be displayed in the UI
+                                    </div>
+                                </div>
+
+                                <!-- Column Index -->
+                                <div class="mb-4">
+                                    <label for="columnIndex" class="form-label">
+                                        <i class="fas fa-columns me-2"></i>Column Index
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="columnIndex" 
+                                           th:field="*{columnIndex}"
+                                           min="0"
+                                           required>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid column index (0 or greater)
+                                    </div>
+                                    <div class="form-text">
+                                        Zero-based index of the column in Excel (e.g., 0 for column A)
+                                    </div>
+                                </div>
+
+                                <!-- Is Key Field -->
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input" 
+                                               id="isKey" 
+                                               th:field="*{key}">
+                                        <label class="form-check-label" for="isKey">
+                                            <i class="fas fa-key me-2"></i>Key Field
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Mark this field as a key for row matching
+                                    </div>
+                                </div>
+
+                                <!-- Active Status -->
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input" 
+                                               id="active" 
+                                               th:field="*{active}">
+                                        <label class="form-check-label" for="active">
+                                            <i class="fas fa-toggle-on me-2"></i>Active
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Enable/disable this field for comparison
+                                    </div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="mb-4">
+                                    <label for="description" class="form-label">
+                                        <i class="fas fa-info-circle me-2"></i>Description
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="description" 
+                                              th:field="*{description}"
+                                              rows="3"></textarea>
+                                    <div class="form-text">
+                                        Optional description or notes about this field
+                                    </div>
+                                </div>
+
+                                <!-- Form Buttons -->
+                                <div class="text-center">
+                                    <a th:href="@{/config}" class="btn btn-secondary me-2">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Save Field
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Help Card -->
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-question-circle me-2"></i>Field Configuration Help
+                            </h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <strong>Field Name:</strong> A unique identifier used internally
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Display Label:</strong> User-friendly name shown in the UI
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Column Index:</strong> Zero-based index (A=0, B=1, etc.)
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Key Field:</strong> Used to match rows between files
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Form validation
+        (function () {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+
+        // Column index validation
+        document.getElementById('columnIndex').addEventListener('input', function(e) {
+            const value = parseInt(e.target.value);
+            if (value < 0) {
+                e.target.value = 0;
+            }
+        });
+
+        // Auto-generate display label from field name
+        document.getElementById('fieldName').addEventListener('input', function(e) {
+            const displayLabel = document.getElementById('displayLabel');
+            if (!displayLabel.value) {
+                displayLabel.value = e.target.value
+                    .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+                    .replace(/^./, function(str) { return str.toUpperCase(); }); // Capitalize first letter
+            }
+        });
+    </script>
+</body>
+</html>
