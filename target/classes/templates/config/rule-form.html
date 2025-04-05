@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: html(content=~{::main}, title=${rule.id} ? 'Edit Rule' : 'New Rule', scripts=~{::script})}">
+<body>
+    <main>
+        <div class="banner text-center">
+            <div class="banner-content">
+                <h1 class="display-4" th:text="${rule.id ? 'Edit Rule' : 'New Rule'}">Rule Form</h1>
+                <p class="lead" th:text="'For field: ' + ${field.displayLabel}">Field Rules</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <form th:object="${rule}" 
+                                  th:action="${rule.id ? '/config/rules/' + rule.id : '/config/fields/' + field.id + '/rules'}"
+                                  method="post" 
+                                  class="needs-validation" 
+                                  novalidate>
+
+                                <!-- Rule Type -->
+                                <div class="mb-4">
+                                    <label for="ruleType" class="form-label">
+                                        <i class="fas fa-shield-alt me-2"></i>Rule Type
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" 
+                                            id="ruleType" 
+                                            th:field="*{ruleType}"
+                                            required
+                                            onchange="updateExpressionHelp()">
+                                        <option value="">Select a rule type</option>
+                                        <option th:each="type : ${ruleTypes}"
+                                                th:value="${type}"
+                                                th:text="${type}">
+                                            RULE_TYPE
+                                        </option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a rule type
+                                    </div>
+                                </div>
+
+                                <!-- Rule Expression -->
+                                <div class="mb-4">
+                                    <label for="ruleExpression" class="form-label">
+                                        <i class="fas fa-code me-2"></i>Rule Expression
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="ruleExpression" 
+                                           th:field="*{ruleExpression}"
+                                           required>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid expression
+                                    </div>
+                                    <div id="expressionHelp" class="form-text">
+                                        Select a rule type to see expression format help
+                                    </div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="mb-4">
+                                    <label for="description" class="form-label">
+                                        <i class="fas fa-info-circle me-2"></i>Description
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="description" 
+                                              th:field="*{description}"
+                                              rows="3"></textarea>
+                                    <div class="form-text">
+                                        Optional description explaining this rule's purpose
+                                    </div>
+                                </div>
+
+                                <!-- Active Status -->
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input" 
+                                               id="active" 
+                                               th:field="*{active}">
+                                        <label class="form-check-label" for="active">
+                                            <i class="fas fa-toggle-on me-2"></i>Active
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Enable/disable this validation rule
+                                    </div>
+                                </div>
+
+                                <!-- Form Buttons -->
+                                <div class="text-center">
+                                    <a th:href="@{/config/fields/{id}/rules(id=${field.id})}" 
+                                       class="btn btn-secondary me-2">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Save Rule
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Help Card -->
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-question-circle me-2"></i>Rule Type Examples
+                            </h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Example</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="badge bg-primary">REGEX</span></td>
+                                            <td><code>^[A-Z]{2}\d{4}$</code></td>
+                                            <td>Two letters followed by 4 digits</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-success">RANGE</span></td>
+                                            <td><code>0,100</code></td>
+                                            <td>Number between 0 and 100</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-warning">NOT_NULL</span></td>
+                                            <td><code>true</code></td>
+                                            <td>Field must not be empty</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-info">CUSTOM</span></td>
+                                            <td><code>custom_expression</code></td>
+                                            <td>Implementation-specific validation</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Form validation
+        (function () {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+
+        // Update expression help text based on selected rule type
+        function updateExpressionHelp() {
+            const ruleType = document.getElementById('ruleType').value;
+            const helpText = document.getElementById('expressionHelp');
+            
+            switch(ruleType) {
+                case 'REGEX':
+                    helpText.textContent = 'Enter a valid regular expression pattern';
+                    break;
+                case 'RANGE':
+                    helpText.textContent = 'Enter min,max values (e.g., 0,100)';
+                    break;
+                case 'NOT_NULL':
+                    helpText.textContent = 'Enter "true" to enable not-null check';
+                    break;
+                case 'CUSTOM':
+                    helpText.textContent = 'Enter custom validation expression';
+                    break;
+                default:
+                    helpText.textContent = 'Select a rule type to see expression format help';
+            }
+        }
+
+        // Initialize help text on page load
+        document.addEventListener('DOMContentLoaded', updateExpressionHelp);
+    </script>
+</body>
+</html>
